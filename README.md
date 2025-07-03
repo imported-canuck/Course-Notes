@@ -1,4 +1,4 @@
-# Course-Notes
+# Course Notes
 LaTeX typeset notes for some of the classes I've taken at McGill University. Mainly math classes.  
 
 **Contents:**  
