@@ -1,0 +1,1317 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{amsthm}
+\usepackage[margin = 1.2in]{geometry}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{tikz}
+\newtheoremstyle{break}          % name
+  {\topsep}                      % space above
+  {\topsep}                      % space below
+  {\itshape}                     % body font
+  {}                             % indent amount
+  {\bfseries}                    % head font
+  {.}                            % punctuation after head  ← put the period back
+  {\newline}                     % linebreak after the head
+  {\thmname{#1}\ \thmnumber{#2}\textbf{\thmnote{ (#3)}}} % ← explicit spec
+
+%--- master counter: everything shares it ------------------
+\theoremstyle{break}             % use that style from now on
+\newtheorem{thm}{Theorem}          % auto-numbered 1,2,3,…
+\newtheorem{prop}[thm]{Proposition}% shares thm counter
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{defn}[thm]{Definition}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+  \vspace*{-0cm}
+  \begin{center}
+    % Top vertical fill
+    \vspace*{\fill}
+    
+    % Course Name (largest)
+    {\Huge MATH 223: Linear Algebra}\\[0.5cm]
+    
+    % University Name
+    {\Large McGill University}\\[1.5cm]
+    
+    % Instructor and Notes by
+    {\large Instructor: Prof.\ Jeremy Macdonald}\\[0.2cm]
+    {\large Notes by: C. A.}\\[1.5cm]
+    
+    % Condensed Notes and Date
+    {\large Condensed Notes}\\[0.2cm]
+    {\large July 1, 2025}\\[2cm]
+    
+    % ─── TikZ diagram ─────────────────────────────────
+    \begin{tikzpicture}[scale = 1.5, transform shape, >=stealth,auto]
+      % Abstract space
+      \node (V1)  at (0,0)   {$V_\beta$};
+      \node (V2)  at (6,0)   {$V_\beta$};
+      \node (V3)  at (0,-3)  {$V_\alpha$};
+      \node (V4)  at (6,-3)  {$V_\alpha$};
+
+      % The two representations
+      \draw[->] (V1) -- node[above] {$[T]_\beta$} (V2);
+      \draw[->] (V3) -- node[above] {$[T]_\alpha$} (V4);
+
+      % Change‐of‐basis arrows
+      \draw[->] (V1) -- node[left]  {$Q_{\beta}^{\alpha}$} (V3);
+      \draw[->] (V4) -- node[right] {$Q_{\alpha}^{\beta}$} (V2);
+    \end{tikzpicture}
+
+    \vspace{0.3cm}
+    {\footnotesize The Similarity Transform (Theorem 68)}
+
+    \vspace*{\fill}
+    % Bottom vertical fill
+    \vspace*{\fill}
+  \end{center}
+\end{titlepage}
+
+\setcounter{tocdepth}{2}   % 0 = sections only; 1 = +subsections; 2 = +subsubsections (not used)
+\tableofcontents
+\newpage
+
+
+
+\section{Complex Numbers}
+
+\subsection{Basics of \(\mathbb{C}\)}
+
+\begin{defn}[Field of Complex Numbers]
+The field of complex numbers, \(\mathbb{C}\), consists of all expressions of the form
+\[
+a + b\,i,
+\]
+where \(a,b\in\mathbb{R}\) and \(i\) is a symbol satisfying \(i^2=-1\).
+\end{defn}
+
+\begin{defn}[Addition and Multiplication]
+Let \(z = a_1 + b_1\,i\) and \(\omega = a_2 + b_2\,i\).  Define
+\[
+z + \omega = (a_1 + a_2) + (b_1 + b_2)\,i,
+\qquad
+z\,\omega = (a_1 + b_1 i)(a_2 + b_2 i)
+= (a_1a_2 - b_1b_2) + (a_1b_2 + a_2b_1)\,i.
+\]
+\end{defn}
+
+\begin{defn}[Conjugate and Modulus]
+For \(z = a + b\,i\),
+\[
+\overline{z} = a - b\,i
+\quad\text{(complex conjugate)}, 
+\qquad
+|z| = \sqrt{a^2 + b^2}
+\quad\text{(absolute value or modulus)}.
+\]
+\end{defn}
+
+\begin{prop}
+If \(z = a + b\,i \neq 0\) (i.e.\ \(z \neq 0 + 0i\)), then the number
+\[
+z^{-1} \;=\; \frac{\overline{z}}{\lvert z \rvert^2} 
+\;=\; \frac{a}{a^2 + b^2} \;-\; \frac{b}{a^2 + b^2}\,i
+\]
+is called the \emph{(multiplicative) inverse} of \(z\) and satisfies 
+\[
+z \, z^{-1} \;=\; 1 
+\;=\; z^{-1}\,z.
+\]
+\end{prop}
+
+\begin{defn}[Division]
+For \(z,\omega\in\mathbb{C}\) with \(\omega\neq0\), define
+\[
+\frac{z}{\omega} \;=\; z\,\omega^{-1}.
+\]
+\end{defn}
+
+\begin{prop}
+Let \(z,w \in \mathbb{C}\).  
+\begin{enumerate}
+\item \(\overline{z + w} = \overline{z} + \overline{w}\).
+\item \(\overline{z\,w} = \overline{z}\,\overline{w}\).
+\item \(\overline{\,\overline{z}\,} = z\).
+\item \(z \,\overline{z} = \lvert z\rvert^{2}\).
+\item \(z \in \mathbb{R} \;\Longleftrightarrow\; \overline{z} = z\).
+\end{enumerate}
+\end{prop}
+
+\subsection{Polar Form and Equation}
+
+\begin{defn}[Complex Exponential Function]
+In the complex plane, \(e^{i\theta}\) is the unique number of modulus 1 and argument \(\theta\).  Equivalently,
+\[
+e^{i\theta} = \cos\theta + i\sin\theta,
+\]
+(Euler’s formula).
+\end{defn}
+
+\begin{thm}[Fundamental Theorem of Algebra]
+Let 
+\[
+p(z) \;=\; a_n\,z^n \;+\; a_{n-1}\,z^{n-1} \;+\;\cdots+\; a_1\,z \;+\; a_0,
+\]
+where \(a_i \in \mathbb{C}\). Then \(p(z)\) factors into linear factors:
+\[
+p(z) \;=\; a_n \,(z - r_1)\,(z - r_2)\,\cdots\,(z - r_n),
+\]
+where each \(r_i \in \mathbb{C}\) (the \(r_i\) may repeat).
+\end{thm}
+
+\section{Vector Spaces}
+
+\subsection{Vector Space Axioms}
+
+\begin{defn}[Field]
+A \emph{field} is a set \(F\) equipped with two operations \(+\) and \(\cdot\) such that:
+\begin{itemize}
+  \item \((F,+)\) is an abelian group.
+  \item \((F\setminus\{0\},\cdot)\) is an abelian group.
+  \item Multiplication distributes over addition: for all \(a,b,c\in F\),
+    \[
+      a\,(b+c)=ab+ac,
+      \qquad
+      (a+b)\,c=ac+bc.
+    \]
+\end{itemize}
+Examples include \(\mathbb{Q},\mathbb{R},\mathbb{C}\).  \(\mathbb{Z}\) is \emph{not} a field since, e.g., \(\tfrac23\notin\mathbb{Z}\).
+\end{defn}
+
+\begin{defn}[Vector Space]
+Let \(F\) be a field and \(V\) a set.  A \emph{vector space over \(F\)} is a pair \((V,+)\) together with a scalar multiplication \(F\times V\to V\) satisfying the following eight axioms for all \(u,v,w\in V\) and \(a,b\in F\):
+\begin{enumerate}
+  \item \(u+v = v+u\).  
+  \item \((u+v)+w = u+(v+w)\).  
+  \item There exists \(0\in V\) with \(u+0=0+u=u\).  
+  \item For each \(u\) there is \(-u\) with \(u+(-u)=(-u)+u=0\).  
+  \item \(a\,(u+v)=au + av\).  
+  \item \((a+b)\,u = au + bu\).  
+  \item \(a\,(b\,u) = (ab)\,u\).  
+  \item \(1\,u = u\), where \(1\) is the multiplicative identity in \(F\).
+\end{enumerate}
+\end{defn}
+
+
+\begin{prop}[Basic Vector Space Properties]
+Let \(V\) be a vector space over a field \(F\).
+\begin{enumerate}
+\item For all \(u,v,w \in V\), if \(u + w = v + w\) then \(u = v\).
+\item The zero vector \(\vec{0}\) in \(V\) is unique.
+\item For each \(u \in V\), its additive inverse \(-u\) is unique.
+\item For all \(u \in V\), \(0\,u = \vec{0}\).
+\item For all \(c \in F\), \(c\,\vec{0} = \vec{0}\).
+\item For all \(c \in F\) and \(u \in V\), \((-c)u = c(-u) = -(cu)\).
+\end{enumerate}
+\end{prop}
+
+\subsection{Linear Combinations and Subspaces}
+
+\begin{defn}[Linear Combination]
+Given vectors \(u_1,u_2,\dots,u_m\in V\) and scalars \(c_1,\dots,c_m\in F\), any vector of the form
+\[
+  c_1\,u_1 + c_2\,u_2 + \cdots + c_m\,u_m
+\]
+is called a \emph{linear combination} of \(u_1,\dots,u_m\).
+\end{defn}
+
+\begin{defn}[Span]
+Let \(S=\{u_1,u_2,\dots,u_m\}\subseteq V\).  The \emph{span} of \(S\) is
+\[
+  \operatorname{span}(S)
+  \;=\;
+  \bigl\{\,c_1u_1 + c_2u_2 + \cdots + c_mu_m
+  \;\big|\;
+  c_i\in F\bigr\}.
+\]
+If \(S=\varnothing\), we define \(\operatorname{span}(\varnothing)=\{0\}\).
+\end{defn}
+
+\begin{prop}
+If \(A,B \in M_{m \times n}(F)\) and \(B\) is obtained from \(A\) by elementary row operations (EROs), then
+\[
+\mathrm{row}(A) = \mathrm{row}(B).
+\]
+\end{prop}
+
+\begin{prop}[Facts About Spans]
+Let \(S \subseteq V\). Then:
+\begin{enumerate}
+\item For all \(u,w \in \mathrm{span}(S)\), \(u + w \in \mathrm{span}(S)\) 
+  \quad(\emph{closure under addition}).
+\item For all \(u \in \mathrm{span}(S)\) and \(c \in F\), \(cu \in \mathrm{span}(S)\) 
+  \quad(\emph{closure under scalar multiplication}).
+\item \(\vec{0} \in \mathrm{span}(S)\).
+\end{enumerate}
+\end{prop}
+
+\begin{defn}[Subspace]
+Let \(V\) be a vector space over a field \(F\), and let \(W\subseteq V\).  We say \(W\) is a \emph{subspace} of \(V\) (and write \(W \leq V\)) if:
+\begin{enumerate}
+  \item For all \(w_1,w_2\in W\), \(w_1+w_2\in W\).
+  \item For all \(w\in W\) and all scalars \(c\in F\), \(c\,w\in W\).
+  \item The zero vector \(0\in W\).
+\end{enumerate}
+\end{defn}
+
+\begin{thm}
+Let \(A \in M_{m \times n}(F)\), \(b \in F^m\), and let \(x \in F^n\) be the vector of variables.  
+Let \(S\) be the set of all solutions to the linear system \(A\,x = b\).  
+Then \(S\) is a subspace of \(F^n\) if and only if 
+\[
+b = 
+\begin{pmatrix}
+0 \\ \vdots \\ 0
+\end{pmatrix} 
+= \vec{0}
+\quad (\text{i.e.\ the system is homogeneous}).
+\]
+\end{thm}
+
+\begin{prop}
+Subspaces are closed under forming linear combinations.  
+If \(W \le V\), then for any positive integer \(n\), if \(w_1,w_2,\dots,w_n \in W\) and \(c_1,\dots,c_n \in F\), then
+\[
+c_1\,w_1 + c_2\,w_2 + \cdots + c_n\,w_n \;\in\; W.
+\]
+\end{prop}
+
+\begin{prop}[Spans Are Subspaces]
+Let \(S \subseteq V\) (a subset) and \(W \le V\) (a subspace). Then:
+\begin{enumerate}
+\item \(S \subseteq \mathrm{span}(S)\).
+\item If \(S \subseteq W\), then \(\mathrm{span}(S) \subseteq W\).
+\item \(\mathrm{span}(W) = W\).
+\end{enumerate}
+\end{prop}
+
+\subsection{Linear Independence and Dependence}
+
+\begin{defn}[Linear Dependence]
+Let \(V\) be a vector space over \(F\) and \(S\subseteq V\).  The set \(S\) is \emph{linearly dependent} if there exist distinct vectors \(u_1,\dots,u_n\in S\) and scalars \(c_1,\dots,c_n\in F\), not all zero, such that
+\[
+c_1u_1 + c_2u_2 + \cdots + c_nu_n \;=\; 0.
+\]
+Otherwise, \(S\) is \emph{linearly independent}.
+\end{defn}
+
+\begin{defn}[Linear Independence]
+Let \(V\) be a vector space over a field \(F\) and let \(S\subseteq V\).  The set \(S\) is said to be \emph{linearly independent} if whenever distinct vectors \(u_1,\dots,u_n\in S\) and scalars \(c_1,\dots,c_n\in F\) satisfy
+\[
+c_1u_1 + c_2u_2 + \cdots + c_nu_n \;=\; 0,
+\]
+it follows that \(c_1 = c_2 = \cdots = c_n = 0\).
+\end{defn}
+
+\begin{prop}[Dependency Special Cases]\leavevmode\vspace{-20.5pt}
+\begin{enumerate}
+\item The empty set \(\varnothing\) is linearly independent.
+\item Let \(S \subseteq V\). If \(\vec{0} \in S\), then \(S\) is dependent 
+  (since \(1 \cdot \vec{0} = \vec{0}\) provides a nontrivial dependence).
+\item Let \(u \in V\). Then \(\{u\}\) is independent if and only if \(u \neq \vec{0}\).  
+  Equivalently, \(\{u\}\) is dependent if and only if \(u = \vec{0}\).
+\item Let \(A \subseteq B \subseteq V\). Then:
+  \begin{enumerate}
+  \item If \(A\) is dependent, then \(B\) is also dependent.
+  \item If \(B\) is independent, then \(A\) is also independent.
+  \end{enumerate}
+\end{enumerate}
+\end{prop}
+
+\begin{lem}[Extending a Linearly Independent Set]
+Let \(S \subseteq V\) be a linearly independent set, and let \(w \in V\) with \(w \notin S\).  
+Then \(S \cup \{w\}\) is independent if and only if \(w \notin \mathrm{span}(S)\).  
+(Adding a vector already in the span of \(S\) makes the set dependent.)
+\end{lem}
+
+\subsection{Basis and Dimension}
+
+\begin{defn}[Basis]
+Let \(V\) be a vector space over \(F\) and let \(W\leq V\).  A subset \(\beta\subseteq W\) is called a \emph{basis} of \(W\) if
+\begin{enumerate}
+  \item \(\displaystyle \operatorname{span}(\beta) = W,\)
+  \item \(\beta\) is linearly independent.
+\end{enumerate}
+\end{defn}
+
+\begin{thm}["Bases Exist"]
+Let \(W \le V\), and suppose \(W = \mathrm{span}(S)\) for some \emph{finite} set \(S\).  
+Then there exists a subset \(\beta \subseteq S\) such that \(\beta\) is a basis of \(W\).  
+(Any finite spanning set can be reduced to a basis.)
+\end{thm}
+
+\begin{thm}["All Bases Have the Same Size"]
+Let \(W = \mathrm{span}(S)\) with \(S\) finite. Then \(W\) has a finite basis, and \emph{all} bases of \(W\) have the same cardinality. This common number is called \(\dim(W)\).
+\end{thm}
+
+\begin{defn}[Dimension]
+A vector space \(V\) (or subspace of one) is called \emph{finite–dimensional} if it admits a finite basis.  The \emph{dimension} of \(V\), written \(\dim(V)\), is the number of vectors in any basis of \(V\).  If no finite basis exists, then \(V\) is \emph{infinite–dimensional}.
+\end{defn}
+
+\begin{thm}
+Every vector space (even one without a finite spanning set) has a basis.
+\end{thm}
+
+\begin{prop}
+If we find the general solution to \(A\,\vec{x} = \vec{0}\) as 
+\[
+\vec{x} \;=\; t_1\,\vec{v}_1 \;+\; t_2\,\vec{v}_2 \;+\;\cdots+\; t_r\,\vec{v}_r,
+\]
+where \(t_1,\dots,t_r\) are the free variables, then \(\{\vec{v}_1,\vec{v}_2,\dots,\vec{v}_r\}\) forms a basis for \(\mathrm{null}(A)\).
+\end{prop}
+
+\begin{thm}
+Suppose \(\dim(W) = n\) is finite, and let \(S \subseteq W\).
+\begin{enumerate}
+\item If \(W = \mathrm{span}(S)\), then \(\lvert S\rvert \ge n\), and there is a subset \(\beta \subseteq S\) such that \(\beta\) is a basis of \(W\).  
+(Any spanning set can be ``shrunk'' to a basis.)
+\item If \(S\) is independent, then \(\lvert S\rvert \le n\), and there is a basis \(\beta\) of \(W\) such that \(S \subseteq \beta\).  
+(Any independent set can be ``extended'' to a basis.)
+\item Let \(\lvert S\rvert = n\). If and only if \(W = \mathrm{span}(S)\), then \(S\) is independent.
+\end{enumerate}
+\end{thm}
+
+\subsection{Subspaces}
+
+\begin{prop}
+Let \(W \leq V\), where \(\dim(V) = n\) is finite.
+\begin{enumerate}
+\item \(\dim(W) \le n.\)
+\item \(\dim(W) = n \;\Longleftrightarrow\; W = V.\)
+\end{enumerate}
+\end{prop}
+
+\begin{defn}[Column Space]
+Let \(A\in M_{m\times n}(F)\).  The \emph{column space} of \(A\), denoted \(\mathrm{col}(A)\), is the subspace of \(F^m\) spanned by the columns of \(A\):
+\[
+\mathrm{col}(A)
+=\mathrm{span}\{\text{columns of }A\}
+\;\le F^m.
+\]
+\end{defn}
+
+\begin{thm}
+Let \(A \in M_{m\times n}(F)\), and let \(R\) be the row-reduced echelon form of \(A\).  
+\begin{enumerate}
+\item A basis for \(\mathrm{row}(A)\) is given by the nonzero rows of \(R\).
+\item The columns of \(A\) that correspond to the leading entries (pivots) in \(R\) form a basis for \(\mathrm{col}(A)\).
+\end{enumerate}
+\end{thm}
+
+\begin{thm}
+Let \(U \le V\) and \(W \le V\) be subspaces of \(V\). Then 
+\[
+U \,\cap\, W \;=\; \{\,v \in V : v \in U \text{ and } v \in W\}
+\]
+is a subspace of \(V\).
+\end{thm}
+
+\begin{defn}[Sum of Subspaces]
+Let \(V\) be a vector space over a field \(F\) and let \(U,W\leq V\).  The \emph{sum} of \(U\) and \(W\) is the subspace
+\[
+U + W \;=\;\{\,u + w \mid u\in U,\;w\in W\}\;\leq V.
+\]
+\end{defn}
+
+\begin{prop}
+Let \(U,W\) be subspaces of \(V\). Then:
+\begin{enumerate}
+\item \(U + W = \mathrm{span}(U \cup W)\).
+\item \(U \le U + W\) and \(W \le U + W\).
+\end{enumerate}
+\end{prop}
+
+\begin{defn}[Direct Sum]
+Suppose \(U,W\leq V\) are subspaces such that every \(v\in V\) can be written uniquely as
+\[
+v = u + w
+\quad\text{with }u\in U,\;w\in W.
+\]
+Then \(V\) is called the \emph{direct sum} of \(U\) and \(W\), and we write
+\[
+V = U \oplus W.
+\]
+\end{defn}
+
+\begin{prop}
+Let \(U,W\) be subspaces of \(V\). Then
+\[
+V = U \oplus W 
+\;\Longleftrightarrow\;
+\bigl(V = U + W\bigr) \text{ and } \bigl(U \,\cap\, W = \{\vec{0}\}\bigr).
+\]
+\end{prop}
+
+\begin{thm}[Inclusion-Exclusion Theorem]
+Let \(U,W\) be finite-dimensional subspaces of \(V\). Then
+\[
+\dim(U + W) \;=\; \dim(U)\;+\;\dim(W)\;-\;\dim\bigl(U \,\cap\, W\bigr).
+\]
+\end{thm}
+
+\subsection{Lagrange Interpolation}
+
+\begin{defn}[Lagrange Polynomials]
+Let $a_0,\dots,a_n\in\mathbb{R}$ be distinct.  For each $i=0,1,\dots,n$, the \emph{Lagrange polynomial} $\ell_i(x)$ is defined by
+\[
+\ell_i(x)\;=\;\prod_{\substack{0\le j\le n\\j\neq i}}
+\frac{x - a_j}{a_i - a_j}.
+\]
+Each $\ell_i(x)$ has degree $n$ and satisfies $\ell_i(a_j)=\delta_{ij}$.
+\end{defn}
+
+\begin{defn}[Kronecker Delta]
+The \emph{Kronecker delta} $\delta_{ij}$ is defined for any indices $i,j$ by
+\[
+\delta_{ij}\;=\;
+\begin{cases}
+1,&i=j,\\
+0,&i\neq j.
+\end{cases}
+\]
+\end{defn}
+
+\begin{prop}\leavevmode\vspace{-20.5pt}
+\begin{enumerate}
+\item If \(l_i(a_j) = \delta_{i,j}\), then \(\delta_{i,j} = 
+\begin{cases}
+1 & \text{if } j = i,\\
+0 & \text{if } j \neq i,
+\end{cases}\) (Kronecker delta).
+\item The polynomials \(l_0(x),\,l_1(x),\dots,\,l_n(x)\) form a basis of \(P_n(\mathbb{R})\).
+\end{enumerate}
+\end{prop}
+
+\section{Linear Transformations}
+
+\subsection{Definition and Basic Properties}
+
+\begin{defn}[Linear Transformation]
+Let $U$ and $V$ be vector spaces over a field $F$, and let $T\colon U\to V$ be a function.  If for all $u_1,u_2\in U$ and all $c\in F$,
+\[
+T(u_1+u_2)=T(u_1)+T(u_2),
+\qquad
+T(c\,u)=c\,T(u),
+\]
+then $T$ is called a \emph{linear transformation}.
+\end{defn}
+
+\begin{prop}[Properties of Linear Transformations]
+Let \(T : U \to V\) be a linear transformation. Then:
+\begin{enumerate}
+\item \(T(\vec{0}) = \vec{0}\).
+\item For all \(u_1, \dots, u_n \in U\) and \(c_1, \dots, c_n \in F\),
+\[
+T\Bigl(\sum_{i=1}^n c_i u_i\Bigr) 
+\;=\; \sum_{i=1}^n c_i \, T(u_i).
+\]
+\end{enumerate}
+\end{prop}
+
+\begin{defn}[Matrix‐Induced Linear Map]
+For any $A\in M_{m\times n}(F)$, define the map
+\[
+L_A\colon F^n \;\longrightarrow\; F^m,
+\qquad
+L_A(v)=A\,v,
+\]
+for all $v\in F^n$.  One checks that $L_A$ is linear.
+\end{defn}
+
+\begin{prop}
+\(L_A\) is a linear transformation.
+\end{prop}
+
+\subsection{Kernel and Image}
+
+\begin{defn}[Kernel and Image]
+Let $T\colon U\to V$ be a linear transformation.  The \emph{kernel} of $T$ is
+\[
+\ker(T)=\{\,u\in U\mid T(u)=0\}\subseteq U,
+\]
+and the \emph{image} of $T$ is
+\[
+\operatorname{Im}(T)=\{\,v\in V\mid v=T(u)\text{ for some }u\in U\}\subseteq V.
+\]
+\end{defn}
+
+\begin{prop}
+Let \(T : U \to V\) be a linear transformation. Then:
+\begin{enumerate}
+\item \(\ker(T) \le U\) (i.e., \(\ker(T)\) is a subspace of \(U\)).
+\item \(\mathrm{Im}(T) \le V\) (i.e., \(\mathrm{Im}(T)\) is a subspace of \(V\)).
+\end{enumerate}
+\end{prop}
+
+\begin{defn}[Rank and Nullity]
+Let $T\colon U\to V$ be a linear transformation between finite‐dimensional spaces.  Then
+\[
+\mathrm{rank}(T)=\dim\bigl(\operatorname{Im}(T)\bigr),
+\qquad
+\mathrm{nullity}(T)=\dim\bigl(\ker(T)\bigr).
+\]
+\end{defn}
+
+\begin{prop}[Spanning Set of $\mathrm{Im}(T)$]
+\(T: U \to V\) linear, \(U = \mathrm{span}(\alpha)\).
+
+Denote \(T(\alpha) = \{\,T(u) \mid u \in \alpha\}\).  
+Then \(T(\alpha)\) spans \(\mathrm{Im}(T)\).
+\end{prop}
+
+\begin{thm}[Rank-Nullity Theorem]
+\(T : U \to V\) linear transformation, with \(\dim(U) = n\) finite.  
+Then 
+\[
+\mathrm{rank}(T) \;+\; \mathrm{nullity}(T) \;=\; \dim(U).
+\]
+\end{thm}
+
+\subsection{Injective, Surjective}
+
+\begin{defn}[Injective, Surjective, Bijective]
+Let \(f: X \to Y\) be a function between sets \(X\) and \(Y\).
+\begin{itemize}
+  \item \(f\) is \emph{injective} (one-to-one) if
+    \[
+      \forall\,x_1,x_2\in X,\;x_1\neq x_2\;\Longrightarrow\;f(x_1)\neq f(x_2),
+    \]
+    equivalently \(\;f(x_1)=f(x_2)\implies x_1=x_2.\)
+  \item \(f\) is \emph{surjective} (onto) if
+    \[
+      \forall\,y\in Y\;\exists\,x\in X\text{ with }f(x)=y,
+    \]
+    equivalently \(\mathrm{Im}(f)=Y.\)
+  \item \(f\) is \emph{bijective} if it is both injective and surjective.
+\end{itemize}
+\end{defn}
+
+\begin{prop}
+\(T : U \to V\) linear, \(U, V\) finite dimensional.  
+\begin{enumerate}
+\item \(T\) injective \(\Longleftrightarrow\) \(\ker(T) = \{\vec{0}\}\)  
+  (\(\Longrightarrow\) \(\mathrm{nullity}(T) = 0\)).
+\item \(T\) surjective \(\Longleftrightarrow\) \(\mathrm{Im}(T) = V\)  
+  (\(\Longrightarrow\) \(\mathrm{rank}(T) = \dim(V)\)).
+\item If \(\dim(U) = \dim(V)\), then \(T\) injective \(\Longleftrightarrow\) \(T\) surjective.
+\item If \(\dim(U) > \dim(V)\), \(T\) is not injective.  
+  If \(\dim(U) < \dim(V)\), \(T\) is not surjective.
+\end{enumerate}
+\end{prop}
+
+\subsection{Isomorphism and Coordinates}
+
+\begin{defn}[Isomorphism of Vector Spaces]
+Let \(T:U\to V\) be a linear transformation between vector spaces over the same field.
+\begin{itemize}
+  \item If \(T\) is bijective, then \(T\) is called an \emph{isomorphism}.
+  \item When such an isomorphism \(T\) exists, we say \(U\) is \emph{isomorphic} to \(V\) and write
+    \[
+      U \cong V.
+    \]
+\end{itemize}
+\end{defn}
+
+\begin{prop}
+Let \(\beta = \{\vec{v}_1, \dots, \vec{v}_n\}\) be a basis of \(V\). Then every \(\vec{v} \in V\) has a 
+\emph{unique} expression
+\[
+\vec{v} \;=\; \sum_{i=1}^n c_i \,\vec{v}_i
+\]
+as a linear combination of basis elements. The vector \((c_1, c_2, \dots, c_n) \in F^n\) of coefficients 
+is called the \emph{coordinate vector} of \(\vec{v}\) relative to \(\beta\), denoted 
+\(\,[\vec{v}]_\beta = (c_1, \dots, c_n).\)
+\end{prop}
+
+\begin{thm}
+Let \(V\) and \(W\) be vector spaces, let \(\alpha = \{v_1,\dots,v_n\}\) be a basis of \(V\), and let \(w_1,\dots,w_n\in W\) be arbitrary.  Then there is a unique linear transformation \(T:V\to W\) such that
+\[
+T(v_i) = w_i\quad (i=1,\dots,n).
+\]
+Moreover, if 
+\(\displaystyle v = \sum_{i=1}^n c_i\,v_i,\) 
+then 
+\[
+T(v) \;=\; \sum_{i=1}^n c_i\,w_i.
+\]
+\end{thm}
+
+\begin{cor}
+If \(T,S:V\to W\) are linear and \(\alpha=\{v_1,\dots,v_n\}\) is a basis of \(V\) with
+\[
+T(v_i) = S(v_i)\quad\text{for }i=1,\dots,n,
+\]
+then \(T=S\).
+\end{cor}
+
+\begin{thm}
+\(V\) vector space, \(\dim V = n\), finite, \(\beta\) basis.  
+The function which computes coordinates 
+\[
+[-]_\beta : V \to F^n
+\]
+is an isomorphism. Hence \(V \cong F^n\) \quad \((n = \dim V)\).
+\end{thm}
+
+\begin{prop}[Composition and Inverses of Lin. Transforms]
+Let \(S: U \to V\), \(T: V \to W\) be linear.
+\begin{enumerate}
+\item The composition \(T \circ S: U \to W\) is linear.
+\item If \(S, T\) both isomorphisms, \(T \circ S\) also is an isomorphism.
+\item If \(T\) is an isomorphism, there is an inverse \(T^{-1}: W \to V\), and \(T^{-1}\) is an isomorphism.
+\end{enumerate}
+\end{prop}
+
+\subsection{Matrix of a Linear Transformation}
+
+\begin{thm}[“Only Dimensions Matter”]
+Let \(U, V\) be finite-dimensional vector spaces over \(F\). Then 
+\[
+U \cong V \quad (\Longleftrightarrow)\quad \dim(U) = \dim(V).
+\]
+\end{thm}
+
+\begin{defn}[Matrix of a Linear Transformation]
+Let \(T\colon U\to V\) be a linear transformation, and let 
+\(\alpha=\{u_1,\dots,u_n\}\) and \(\beta=\{v_1,\dots,v_m\}\)
+be ordered bases of \(U\) and \(V\), respectively.  The \emph{matrix of \(T\) relative to \(\alpha\) and \(\beta\)} is the \(m\times n\) matrix
+\[
+[T]_{\alpha}^{\beta}
+=
+\bigl([T(u_1)]_{\beta}\;\big|\;\dots\;\big|\;[T(u_n)]_{\beta}\bigr),
+\]
+whose \(i\)th column is the coordinate vector of \(T(u_i)\) in the basis \(\beta\).
+\end{defn}
+
+\begin{thm}["{\([T]_\alpha^\beta\) Computes \(T\) in Coordinates}"]
+Let \(T: U \to V\) be linear, \(\alpha, \beta\) bases of \(U, V\). Then for all \(u \in U\),
+\[
+[T]_\alpha^\beta \,[u]_\alpha \;=\; [\,T(u)\,]_\beta.
+\]
+\end{thm}
+
+\begin{prop}[{$\ker$ and $\mathrm{Im}$ in Coordinates}]
+Let \(T : U \to V\), and let \(\alpha, \beta\) be bases of \(U\) and \(V\). Define \(A = [T]_{\alpha}^{\beta}\).
+\end{prop}
+
+\begin{enumerate}
+\item \(\ker(T)\) corresponds, via \(\alpha\)-coordinates, to \(\mathrm{null}(A)\) (i.e.\ the solution set of \(A \vec{x} = \vec{0}\)). In particular, 
+\[
+\mathrm{nullity}(T) \;=\; \mathrm{nullity}(A) \;=\; \#\{\text{free variables}\}.
+\]
+
+\item \(\mathrm{Im}(T)\) corresponds, via \(\beta\)-coordinates, to \(\mathrm{Im}(L_A) = \mathrm{col}(A)\). Hence
+\[
+\mathrm{rank}(T) \;=\; \mathrm{rank}(A).
+\]
+\end{enumerate}
+
+\begin{defn}[Linear Operator]
+Let \(T\colon V\to V\) be a linear transformation on a vector space \(V\) (the domain and codomain are the same vector space).  Such a \(T\) is called a \emph{linear operator}.  If \(\dim(V)=n\), then its matrix relative to any basis \(\alpha\) of \(V\) is an \(n\times n\) matrix, commonly denoted
+\[
+[T]_{\alpha}^{\alpha} = [T]_{\alpha},
+\]
+or simply \([T]\) when the basis is understood.
+\end{defn}
+
+\begin{prop}
+Let \(T: V \to V\) be a linear operator, and let \(\alpha\) be a basis of \(V\) with \(n = \dim(V)\).  Then
+\[
+T\text{ is invertible}
+\quad\Longleftrightarrow\quad
+[T]_{\alpha}\text{ is invertible}.
+\]
+Moreover, if \(T\) is invertible, then
+\[
+\bigl[T^{-1}\bigr]_{\alpha}
+\;=\;
+\bigl([T]_{\alpha}\bigr)^{-1}.
+\]
+\end{prop}
+
+\subsection{Change of Basis}
+
+\begin{defn}[Change‐of‐Coordinates Matrix]
+Let \(V\) be an \(n\)-dimensional vector space over a field \(F\), and let 
+\(\alpha\) and \(\beta\) be two ordered bases of \(V\).  The \emph{change‐of‐coordinates matrix from \(\alpha\) to \(\beta\)} is the \(n\times n\) matrix
+\[
+Q^\beta_\alpha \;=\; [I]^{\beta}_{\alpha},
+\]
+where \(I:V\to V\) is the identity.  Equivalently, the \(j\)th column of \(Q^\beta_\alpha\) is the coordinate vector of the \(j\)th basis vector of \(\alpha\) expressed in the basis \(\beta\).
+\end{defn}
+
+\begin{prop}\leavevmode\vspace{-20.5pt}
+\begin{enumerate}
+\item For every $u\in V$,
+\[
+Q^\beta_\alpha\,[u]_\alpha \;=\; [u]_\beta.
+\]
+\item $Q^\beta_\alpha$ is invertible and 
+\[
+\bigl(Q^\beta_\alpha\bigr)^{-1} \;=\; Q^\alpha_\beta.
+\]
+\end{enumerate}
+\end{prop}
+
+\begin{thm}[Similarity Transformation]
+Let $T:V\to V$ be a linear operator and let $\alpha,\beta$ be two bases of $V$.  Then
+\[
+Q^\beta_\alpha \,[T]_\alpha \,Q^\alpha_\beta \;=\; [T]_\beta.
+\]
+\end{thm}
+
+\begin{defn}[Similar Matrices]
+Let \(A,B\in M_{n\times n}(F)\).  We say \(A\) and \(B\) are \emph{similar} if there exists an invertible matrix \(Q\in M_{n\times n}(F)\) such that
+\[
+Q^{-1} \,A\,Q \;=\; B.
+\]
+\end{defn}
+
+\begin{prop}
+Let $Q\in M_{n\times n}(F)$ be any invertible matrix and let $\alpha$ be a basis of $V$ (so $n=\dim V$).  Then there exists a basis $\beta$ of $V$ such that
+\[
+Q \;=\; Q^\beta_\alpha.
+\]
+\end{prop}
+
+\begin{prop}
+Let $T:V\to V$ be a linear operator, let $\alpha$ be a basis of $V$, and let $B\in M_{n\times n}(F)$ be any matrix.  Then
+\[
+[T]_\alpha \text{ is similar to } B
+\quad\Longleftrightarrow\quad
+\exists \text{ a basis }\beta\text{ of }V\text{ with }B = [T]_\beta.
+\]
+\end{prop}
+
+\begin{thm}
+If $\dim V = n$ and $\dim W = m$, then
+\[
+\mathcal{L}(V,W)\;\cong\;M_{m\times n}(F).
+\]
+Moreover, given a basis $\alpha$ of $V$ and a basis $\beta$ of $W$, the map
+\[
+\varphi:\mathcal{L}(V,W)\;\longrightarrow\;M_{m\times n}(F),
+\qquad
+\varphi(T) = [T]_\alpha^\beta
+\]
+is a vector‐space isomorphism.
+\end{thm}
+
+\section{Inner Product Spaces}
+
+\subsection{Definition and Main Examples}
+
+\begin{defn}[Inner Product]
+Let \(V\) be a vector space over \(\mathbb{F}\) (where \(\mathbb{F}=\mathbb{R}\) or \(\mathbb{C}\)).  An \emph{inner product} on \(V\) is a function
+\[
+\langle\,\cdot\,,\,\cdot\,\rangle \colon V\times V \;\longrightarrow\; \mathbb{F}
+\]
+satisfying for all \(u,v,w\in V\) and all scalars \(c\in\mathbb{F}\):
+\begin{enumerate}
+  \item \(\displaystyle \langle u,\,v+w\rangle = \langle u,\,v\rangle + \langle u,\,w\rangle,\)
+    \quad\(\langle u,\,c\,v\rangle = c\,\langle u,\,v\rangle.\)
+    \quad(\emph{linearity}).
+  \item \(\displaystyle \langle u,\,v\rangle = \overline{\langle v,\,u\rangle}\)
+    \quad(\emph{conjugate symmetry}).
+  \item \(\displaystyle \langle u,\,u\rangle > 0\) for all \(u\neq 0\)
+    \quad(\emph{positive definiteness}).
+\end{enumerate}
+\end{defn}
+
+\begin{prop}[Inner Product Properties]
+Let $V$ be an inner‐product space over $\mathbb F$ and let $u,v,w\in V$, $c\in\mathbb F$.  Then:
+\begin{enumerate}
+\item \emph{(Conjugate‐linearity in the second slot)}  
+\[
+\langle u,\,v+w\rangle = \langle u,v\rangle + \langle u,w\rangle,
+\qquad
+\langle u,\,c\,v\rangle = \overline{c}\,\langle u,v\rangle.
+\]
+\item $\langle u,0\rangle = 0$ and $\langle 0,u\rangle = 0$.
+\item $\langle u,u\rangle = 0$ if and only if $u=0$.
+\item If $\langle u,w\rangle = \langle v,w\rangle$ for all $w\in V$, then $u=v$.
+\end{enumerate}
+\end{prop}
+
+\begin{defn}[Conjugate and Adjoint of a Matrix]
+Let \(A = (a_{ij})\in M_{m\times n}(\mathbb{F})\).  
+\begin{itemize}
+  \item The \emph{conjugate} of \(A\) is the entrywise–conjugated matrix
+    \[
+      \overline{A} \;=\;\bigl(\overline{a_{ij}}\bigr)
+      \;\in\;M_{m\times n}(\mathbb{F}).
+    \]
+  \item If \(A\) is square (\(n=m\)), the \emph{adjoint} (or Hermitian transpose) of \(A\) is
+    \[
+      A^* \;=\;\overline{A}^{\,T}
+      \;=\;\bigl(\overline{A}\bigr)^{T}
+      \;\in\;M_{n\times n}(\mathbb{F}),
+    \]
+    characterized by \(\langle A\,u,\,v\rangle = \langle u,\,A^*v\rangle\) for all \(u,v\).
+\end{itemize}
+\end{defn}
+
+\subsection{Norm and Angle}
+
+\begin{defn}[Norm]
+Let \(V\) be an inner‐product space with inner product \(\langle\cdot,\cdot\rangle\).  The \emph{norm} (or length) of a vector \(u\in V\) is
+\[
+\|u\|
+\;=\;
+\sqrt{\langle u,\,u\rangle}\,.
+\]
+\end{defn}
+
+\begin{prop}
+Let $V$ be an inner‐product space, $u\in V$, and $c\in\mathbb F$.  Then
+\[
+\|c\,u\| \;=\; |c|\,\|u\|.
+\]
+\end{prop}
+
+\begin{thm}[Cauchy–Schwarz Inequality]
+Let \(V\) be an inner-product space and \(u,v\in V\). Then
+\begin{enumerate}
+  \item \(\displaystyle \bigl\lvert\langle u,v\rangle\bigr\rvert \le \|u\|\,\|v\|\).
+  \item Equality holds, \(\lvert\langle u,v\rangle\rvert = \|u\|\|v\|\), if and only if 
+  \(u = c\,v\) (equivalently \(v = c\,u\)) for some scalar \(c\in\mathbb F\).
+\end{enumerate}
+\end{thm}
+
+\begin{prop}[Triangle Inequality]
+In any inner-product space \(V\), for all \(u,v\in V\),
+\[
+\|u+v\|\;\le\;\|u\| + \|v\|.
+\]
+\end{prop}
+
+\begin{defn}[Angle]
+Let \(V\) be a real inner‐product space and let \(u,v\in V\) be nonzero.  By the Cauchy–Schwarz inequality, the quotient
+\[
+\frac{\langle u,v\rangle}{\|u\|\;\|v\|}
+\]
+lies in \([-1,1]\), so there is a unique \(\theta\in[0,\pi]\) with
+\[
+\cos\theta
+\;=\;
+\frac{\langle u,v\rangle}{\|u\|\;\|v\|}.
+\]
+This \(\theta\) is called the \emph{angle} between \(u\) and \(v\).
+\end{defn}
+
+\subsection{Orthogonal Sets and Complements}
+
+\begin{defn}[Orthogonal and Orthonormal Sets]
+Let \(V\) be an inner‐product space.
+\begin{enumerate}
+  \item Two vectors \(u,v\in V\) are called \emph{orthogonal} if \(\langle u,v\rangle=0\).  (In particular, the zero‐vector is orthogonal to every vector.)
+  \item A subset \(X\subseteq V\) is \emph{orthogonal} if every pair of distinct vectors in \(X\) is orthogonal and \(0\notin X\).
+  \item If, in addition, \(\|u\|=1\) for all \(u\in X\), then \(X\) is \emph{orthonormal}.
+  \item An orthonormal subset that is also a basis of \(V\) is called an \emph{orthonormal basis} (ONB).
+\end{enumerate}
+\end{defn}
+
+\begin{prop}
+Let \(V\) be an inner-product space and let \(X\subseteq V\) be an orthogonal set.  Then \(X\) is linearly independent.
+\end{prop}
+
+\begin{thm}[Fourier Coefficients]
+Let \(\alpha=\{v_1,\dots,v_n\}\) be an orthogonal basis of the inner-product space \(V\).  Then for every \(u\in V\),
+\[
+u \;=\; \sum_{i=1}^n \frac{\langle u,v_i\rangle}{\langle v_i,v_i\rangle}\,v_i,
+\]
+and the coordinate vector \([u]_\alpha\) is
+\[
+[u]_\alpha
+=
+\begin{pmatrix}
+\displaystyle\frac{\langle u,v_1\rangle}{\langle v_1,v_1\rangle}\\[6pt]
+\vdots\\[3pt]
+\displaystyle\frac{\langle u,v_n\rangle}{\langle v_n,v_n\rangle}
+\end{pmatrix}.
+\]
+If \(\alpha\) is orthonormal, then this simplifies to
+\[
+u = \sum_{i=1}^n \langle u,v_i\rangle\,v_i.
+\]
+\end{thm}
+
+\begin{defn}[Orthogonal Complement]
+Let \(V\) be an inner‐product space and \(X\subseteq V\).  The \emph{orthogonal complement} of \(X\) is
+\[
+X^{\perp}
+\;=\;
+\{\,v\in V \mid \langle v,x\rangle = 0 \ \text{for all }x\in X\},
+\]
+which is a subspace of \(V\).
+\end{defn}
+
+\begin{prop}
+Let \(W\le V\).  Then:
+\begin{enumerate}
+  \item \(W^\perp\) is a subspace of \(V\).
+  \item If \(\alpha=\{w_1,\dots,w_k\}\) is a basis of \(W\), then for any \(u\in V\),
+  \[
+    u\in W^\perp
+    \;\Longleftrightarrow\;
+    \langle u,w_i\rangle = 0\quad (i=1,\dots,k).
+  \]
+  \item \(W\cap W^\perp = \{0\}.\)
+\end{enumerate}
+\end{prop}
+
+\subsection{Orthogonal Projection and Gram-Schmidt Algorithm}
+
+\begin{thm}[Orthogonal Projection]
+Let \(V\) be an inner-product space and \(W\le V\) a finite-dimensional subspace.  Then:
+\begin{enumerate}
+  \item For each \(u\in V\) there are unique \(w\in W\) and \(w'\in W^\perp\) such that 
+  \(\;u = w + w'\).  Hence \(V = W\oplus W^\perp\).
+  \item If \(\{u_1,\dots,u_k\}\) is an orthogonal basis of \(W\), then the projection \(w\in W\) of any \(u\in V\) is
+  \[
+    w \;=\; \sum_{i=1}^k \frac{\langle u,u_i\rangle}{\langle u_i,u_i\rangle}\,u_i.
+  \]
+  \item If \(V\) is finite-dimensional, then 
+  \(\dim V = \dim W + \dim W^\perp.\)
+\end{enumerate}
+\end{thm}
+
+\begin{lem}[Pythagoras’ Theorem]
+Let \(V\) be an inner‐product space and let \(u,v\in V\) be orthogonal.  Then
+\[
+\|u+v\|^2 \;=\;\|u\|^2 + \|v\|^2.
+\]
+\end{lem}
+
+\begin{thm}[Projection is Closest Vector in $W$]
+Let \(V\) be an inner‐product space, \(W\le V\) finite‐dimensional, and \(u\in V\).  Write the unique decomposition
+\[
+u = w + w',\quad w\in W,\;w'\in W^\perp,
+\]
+so that \(w = P_W(u)\).  Then \(w\) is the closest vector in \(W\) to \(u\), in the sense that for every \(z\in W\),
+\[
+\|u - w\|\;\le\;\|u - z\|.
+\]
+\end{thm}
+
+\begin{thm}[Gram–Schmidt Orthogonalization]
+With the notation of the Gram–Schmidt process applied to a basis \(\{u_1,\dots,u_n\}\subset V\), one defines vectors \(v_1,\dots,v_n\).  Then:
+\begin{enumerate}
+  \item For each \(k=1,\dots,n\),
+  \[
+    \mathrm{span}\{v_1,\dots,v_k\}
+    =\,\mathrm{span}\{u_1,\dots,u_k\},
+  \]
+  hence \(\{v_1,\dots,v_n\}\) spans the same subspace \(W\).
+  \item For each \(k\), the set \(\{v_1,\dots,v_k\}\) is orthogonal in 
+  \(W_k=\mathrm{span}\{u_1,\dots,u_k\}\), and in particular 
+  \(\{v_1,\dots,v_n\}\) is an orthogonal basis of \(W\).
+\end{enumerate}
+\end{thm}
+
+\subsection{Inner Product Defined by a Matrix}
+
+\begin{defn}[Positive Definite Matrix]
+Let \(A\in M_{n\times n}(\mathbb{R})\) be symmetric.  \(A\) is called \emph{positive definite} if
+\[
+u^T A\,u > 0
+\quad\text{for all nonzero }u\in\mathbb{R}^n.
+\]
+\end{defn}
+
+\begin{prop}
+Let \(A\in M_{n\times n}(\mathbb R)\) be symmetric and positive definite.  Then
+\[
+\langle u,v\rangle_A \;=\; u^T A v
+\]
+defines an inner product on \(\mathbb R^n\).
+\end{prop}
+
+\section{Eigenvalues and Diagonalization}
+
+\subsection{Eigenvalues and Eigenvectors}
+
+\begin{defn}[Eigenvector and Eigenvalue]
+Let \(T\colon V\to V\) be a linear operator on a vector space \(V\).  A nonzero vector \(u\in V\) is an \emph{eigenvector} of \(T\) if there exists a scalar \(\lambda\in F\) such that
+\[
+T(u) \;=\;\lambda\,u.
+\]
+The scalar \(\lambda\) is called the corresponding \emph{eigenvalue}.
+\end{defn}
+
+\begin{defn}[Eigenspace]
+If \(\lambda\) is an eigenvalue of \(T\colon V\to V\), the \emph{eigenspace} of \(\lambda\) is the subspace
+\[
+E_\lambda
+=\{\,u\in V \mid T(u)=\lambda\,u\}.
+\]
+\end{defn}
+
+\begin{defn}[Characteristic Polynomial]
+Let \(T\colon V\to V\) be a linear operator on an \(n\)-dimensional vector space \(V\).  The \emph{characteristic polynomial} of \(T\) is
+\[
+C_T(x)
+=\det\bigl([T]_\alpha - x\,I\bigr),
+\]
+where \(\alpha\) is any basis of \(V\) and \([T]_\alpha\) is the matrix of \(T\) relative to \(\alpha\).
+\end{defn}
+
+\begin{prop}[Characteristic Polynomial]
+Let \(T:V\to V\) be a linear operator on an \(n\)-dimensional space \(V\).  Its characteristic polynomial \(C_T(x)\) satisfies:
+\begin{enumerate}
+  \item \(C_T(x)\) is independent of the choice of basis.
+  \item \(\deg C_T = n\).
+  \item A scalar \(\lambda\) is an eigenvalue of \(T\) if and only if \(C_T(\lambda)=0\).
+  \item The eigenspace \(E_\lambda = \ker(T-\lambda I)\) is a subspace of \(V\).
+\end{enumerate}
+\end{prop}
+
+\subsection{Diagonalization}
+
+\begin{defn}[Diagonalizable Operator]
+Let \(T\colon V\to V\) be a linear operator on a finite-dimensional vector space \(V\).  We say \(T\) is \emph{diagonalizable} if there exists a basis \(\alpha\) of \(V\) consisting entirely of eigenvectors of \(T\); equivalently, in that basis the matrix of \(T\) is diagonal.
+\end{defn}
+
+\begin{prop}[Diagonalizability Criterion]
+Let \(T:V\to V\) be a linear operator on a finite‐dimensional space \(V\).  Then \(T\) is diagonalizable if and only if there exists a basis of \(V\) consisting of eigenvectors of \(T\); equivalently, for any basis \(\beta\), the matrix \([T]_\beta\) is similar to a diagonal matrix.
+\end{prop}
+
+\begin{defn}[Diagonalizable Matrix]
+Let \(A\in M_{n\times n}(F)\).  We say \(A\) is \emph{diagonalizable} if there exist an invertible matrix \(Q\in M_{n\times n}(F)\) and a diagonal matrix \(D\in M_{n\times n}(F)\) such that
+\[
+Q^{-1}\,A\,Q \;=\; D.
+\]
+\end{defn}
+
+\subsection{Diagonalizability}
+\begin{prop}
+Let \(V\) be a finite‐dimensional real vector space and \(T:V\to V\) linear.  If the characteristic polynomial \(C_T(x)\) has a nonreal complex root, then \(T\) is not diagonalizable over \(\mathbb R\).
+\end{prop}
+
+\begin{lem}
+Let \(T:V\to V\) be linear and let \(\lambda_1\neq\lambda_2\) be two distinct eigenvalues.  Then
+\[
+E_{\lambda_1}\;\cap\;E_{\lambda_2} \;=\;\{0\}.
+\]
+\end{lem}
+
+\begin{prop}
+Let \(T:V\to V\) have distinct eigenvalues \(\lambda_1,\dots,\lambda_m\).  For each \(i\) let \(\beta_i\) be a basis of the eigenspace \(E_{\lambda_i}\), and set \(\beta=\beta_1\cup\cdots\cup\beta_m\).  Then:
+\begin{enumerate}
+  \item \(\lvert\beta\rvert = \sum_i \lvert\beta_i\rvert.\)
+  \item \(\beta\) is linearly independent.
+\end{enumerate}
+\end{prop}
+
+\begin{cor}
+If \(T:V\to V\) is linear on an \(n\)-dimensional space and has \(n\) distinct eigenvalues, then \(T\) is diagonalizable.
+\end{cor}
+
+\begin{defn}[Geometric and Algebraic Multiplicity]
+Let \(T\colon V\to V\) be a linear operator and \(\lambda\) an eigenvalue of \(T\).  
+\begin{itemize}
+  \item The \emph{geometric multiplicity} of \(\lambda\) is \(\dim E_\lambda\), where \(E_\lambda=\ker(T-\lambda I)\).
+  \item The \emph{algebraic multiplicity} of \(\lambda\) is the exponent of the factor \((x-\lambda)\) in the characteristic polynomial \(C_T(x)\).
+\end{itemize}
+\end{defn}
+
+\begin{thm}
+Let \(T:V\to V\) be a linear operator on a finite‐dimensional space \(V\), and let \(\lambda\) be any eigenvalue of \(T\).  Then
+\[
+1 \;\le\;\bigl(\text{geometric multiplicity of }\lambda\bigr)
+\;\le\;\bigl(\text{algebraic multiplicity of }\lambda\bigr).
+\]
+\end{thm}
+
+\begin{prop}
+Let \(T:V\to V\) be a linear operator on an \(n\)-dimensional vector space over a field \(F\), with characteristic polynomial \(C_T(x)\).
+\begin{enumerate}
+  \item If \(F=\mathbb{R}\) and \(C_T(x)\) has a nonreal root, then \(T\) is not diagonalizable over \(\mathbb{R}\).
+  \item If \(F=\mathbb{R}\) and all roots of \(C_T(x)\) lie in \(\mathbb{R}\), or if \(F=\mathbb{C}\), then
+  \[
+  T \text{ is diagonalizable}
+  \quad\Longleftrightarrow\quad
+  \forall\,\lambda,\;
+    \bigl(\text{geom.~mult.~}\lambda\bigr)
+    =\bigl(\text{alg.~mult.~}\lambda\bigr).
+  \]
+  \item When \(T\) is diagonalizable, let \(\lambda_1,\dots,\lambda_k\) be its distinct eigenvalues and \(\beta_i\) a basis of the eigenspace \(E_{\lambda_i}\).  Then
+  \[
+    \beta = \beta_1\;\cup\;\beta_2\;\cup\cdots\cup\;\beta_k
+  \]
+  is a basis of \(V\) consisting entirely of eigenvectors of \(T\).
+\end{enumerate}
+\end{prop}
+
+\subsection{Orthogonal Diagonalization}
+
+\begin{defn}[Symmetric, Orthogonal, Self-Adjoint, Unitary Matrices]
+Let \(A\in M_{n\times n}(F)\).
+\begin{itemize}
+  \item If \(F=\mathbb R\), \(A\) is \emph{symmetric} when \(A^T=A\).
+  \item If \(F=\mathbb R\), \(A\) is \emph{orthogonal} when its columns form an orthonormal basis of \(\mathbb R^n\) (equivalently \(A^T=A^{-1}\)).
+  \item If \(F=\mathbb C\), \(A\) is \emph{self-adjoint} (Hermitian) when \(A^*=A\).
+  \item If \(F=\mathbb C\), \(A\) is \emph{unitary} when its columns form an orthonormal basis of \(\mathbb C^n\) (equivalently \(A^*=A^{-1}\)).
+\end{itemize}
+\end{defn}
+
+\begin{prop}[Orthogonal and Unitary Matrices]\leavevmode\vspace{-20.5pt}
+\begin{enumerate}
+  \item If \(A\in M_{n}(\mathbb{R})\), then \(A\) is orthogonal \(\Leftrightarrow A^T = A^{-1}\).
+  \item If \(A\in M_{n}(\mathbb{C})\), then \(A\) is unitary \(\Leftrightarrow A^* = A^{-1}\).
+\end{enumerate}
+\end{prop}
+
+\begin{defn}[Orthogonal and Unitary Diagonalizability]
+Let \(A\in M_{n\times n}(F)\).
+\begin{itemize}
+  \item If \(F=\mathbb R\), \(A\) is \emph{orthogonally diagonalizable} if there exists an orthogonal matrix \(Q\) and a diagonal \(D\) with
+  \[
+    Q^T\,A\,Q = D
+    \quad\Longleftrightarrow\quad
+    A = Q\,D\,Q^T.
+  \]
+  \item If \(F=\mathbb C\), \(A\) is \emph{unitarily diagonalizable} if there exists a unitary matrix \(Q\) and a diagonal \(D\) with
+  \[
+    Q^*\,A\,Q = D
+    \quad\Longleftrightarrow\quad
+    A = Q\,D\,Q^*.
+  \]
+\end{itemize}
+\end{defn}
+
+\begin{prop}\leavevmode\vspace{-20.5pt}
+\begin{enumerate}
+  \item If \(A\in M_{n}(\mathbb{R})\) is orthogonally diagonalizable, then \(A\) is symmetric (\(A^T = A\)).
+  \item If \(A\in M_{n}(\mathbb{C})\) is unitarily diagonalizable, then \(A\) is normal (\(A^*A = AA^*\)).
+\end{enumerate}
+\end{prop}
+
+\begin{lem}\leavevmode\vspace{-20.5pt}
+\begin{enumerate}
+  \item If \(A\in M_{n}(\mathbb{R})\) and \(u,v\in\mathbb{R}^n\), then
+  \[
+    \langle A u, v\rangle = \langle u, A^T v\rangle,
+    \quad
+    \langle u, A v\rangle = \langle A^T u, v\rangle.
+  \]
+  \item If \(A\in M_{n}(\mathbb{C})\) and \(u,v\in\mathbb{C}^n\), then
+  \[
+    \langle A u, v\rangle = \langle u, A^* v\rangle,
+    \quad
+    \langle u, A v\rangle = \langle A^* u, v\rangle.
+  \]
+\end{enumerate}
+\end{lem}
+
+\begin{thm}[Reality of Eigenvalues]
+If \(A\in M_n(\mathbb{R})\) is symmetric or \(A\in M_n(\mathbb{C})\) is self-adjoint, then all roots of its characteristic polynomial lie in \(\mathbb{R}\); equivalently, every eigenvalue of \(A\) is real.
+\end{thm}
+
+\begin{thm}[Orthogonality of Eigenspaces]
+Let \(A\in M_n(\mathbb{R})\) be symmetric or \(A\in M_n(\mathbb{C})\) be normal.  Then its eigenspaces are mutually orthogonal: if \(u\in E_{\lambda_1}\) and \(w\in E_{\lambda_2}\) with \(\lambda_1\neq\lambda_2\), then \(\langle u,w\rangle=0\).
+\end{thm}
+
+\begin{thm}[Spectral Theorem]\leavevmode\vspace{-20.5pt}
+\begin{enumerate}
+  \item For \(A\in M_n(\mathbb{R})\):
+  \[
+    A \text{ orthogonally diagonalizable}
+    \quad\Longleftrightarrow\quad
+    A \text{ symmetric }(A^T=A).
+  \]
+  \item For \(A\in M_n(\mathbb{C})\):
+  \[
+    A \text{ unitarily diagonalizable}
+    \quad\Longleftrightarrow\quad
+    A \text{ normal }(A^*A=AA^*).
+  \]
+\end{enumerate}
+\end{thm}
+
+\begin{defn}[Definiteness of a Symmetric Matrix]
+Let \(A\in M_{n\times n}(\mathbb{R})\) be symmetric.  We say:
+\begin{itemize}
+  \item \(A\) is \emph{positive definite} if \(u^T A\,u>0\) for all nonzero \(u\in\mathbb{R}^n\).
+  \item \(A\) is \emph{positive semidefinite} if \(u^T A\,u\ge0\) for all \(u\in\mathbb{R}^n\).
+  \item \(A\) is \emph{negative definite} if \(u^T A\,u<0\) for all nonzero \(u\).
+  \item \(A\) is \emph{negative semidefinite} if \(u^T A\,u\le0\) for all \(u\).
+  \item Otherwise, \(A\) is called \emph{indefinite}.
+\end{itemize}
+\end{defn}
+
+\begin{thm}[Positive Definiteness]
+Let \(A\in M_n(\mathbb{R})\) be symmetric.  Then
+\[
+A \text{ is positive definite}
+\quad\Longleftrightarrow\quad
+\text{all eigenvalues of }A\text{ are positive}.
+\]
+\end{thm}
+
+\begin{lem}
+Let \(A\in M_{m\times n}(\mathbb{R})\).  Then:
+\begin{enumerate}
+  \item \(A^T A\in M_{n\times n}(\mathbb{R})\) and \(A A^T\in M_{m\times m}(\mathbb{R})\) are symmetric and positive semi-definite.
+  \item \(\displaystyle \mathrm{rank}(A^T A) = \mathrm{rank}(A) = \mathrm{rank}(A A^T).\)
+\end{enumerate}
+\end{lem}
+
+\subsection{Singular Value Decomposition}
+
+\begin{thm}[Singular Value Decomposition]
+Let \(A\in M_{m\times n}(\mathbb{R})\), and let \(L_A:\mathbb{R}^n\to\mathbb{R}^m\) be the associated linear map.  Set \(r=\mathrm{rank}(A)\).  Then there exist orthonormal bases
+\[
+\beta = \{v_1,\dots,v_n\}\subset\mathbb{R}^n,
+\qquad
+\gamma=\{w_1,\dots,w_m\}\subset\mathbb{R}^m,
+\]
+and positive scalars
+\(\sigma_1\ge\sigma_2\ge\cdots\ge\sigma_r>0\),
+such that
+\[
+L_A(v_i) =
+\begin{cases}
+\sigma_i\,w_i, & i=1,\dots,r,\\
+0, & i=r+1,\dots,n.
+\end{cases}
+\]
+Consequently, the matrix of \(L_A\) relative to \(\beta,\gamma\) is
+\[
+[L_A]_\beta^\gamma
+=
+\begin{pmatrix}
+\sigma_1 &        &        &        &        &        \\
+         & \sigma_2 &        &        &        &        \\
+         &        & \ddots &        &        &        \\
+         &        &        & \sigma_r &        &        \\
+         &        &        &        & 0      &        \\
+         &        &        &        &        & \ddots 
+\end{pmatrix}_{m\times n}.
+\]
+\end{thm}
+
+\begin{defn}[Singular Values]
+Let \(A\in M_{m\times n}(\mathbb{R})\) have rank \(r\).  In its singular value decomposition one obtains positive scalars
+\[
+\sigma_1 \;\ge\;\sigma_2\;\ge\;\cdots\;\ge\;\sigma_r>0.
+\]
+These \(\sigma_1,\dots,\sigma_r\) are called the \emph{singular values} of \(A\).
+\end{defn}
+
+\begin{cor}
+In the SVD of Theorem 117:
+\begin{enumerate}
+  \item \(\{v_1,\dots,v_n\}\) is an orthonormal basis of eigenvectors of \(A^T A\) in \(\mathbb{R}^n\).
+  \item \(\{w_1,\dots,w_m\}\) is an orthonormal basis of eigenvectors of \(A A^T\) in \(\mathbb{R}^m\).
+  \item \(A^T A\) and \(A A^T\) have the same nonzero eigenvalues, and the singular values \(\sigma_i\) are the positive square roots of these eigenvalues.
+\end{enumerate}
+\end{cor}
+
+\end{document}
